@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:toola="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
+    android:layout_marginTop="5dp"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="5dp"
+    android:background="@drawable/shape_8dp_ffffff"
+    android:layout_height="160dp">
+
+    <ImageView
+        android:id="@+id/ivImage"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <!--类型-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="类型："
+                android:textColor="#C0C0C0"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aadhaar"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!--性别-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="性别(Gender)："
+                android:textColor="#C0C0C0"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvGender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                toola:text="女"
+                android:textColor="#000000"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!--姓名-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvNameTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="姓名(Aadhaar Name)："
+                android:textColor="#C0C0C0"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                toola:text="刘亦菲"
+                android:textColor="#000000"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!--出生日期-->
+        <LinearLayout
+            android:id="@+id/llData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            android:visibility="gone"
+            android:gravity="center_vertical"
+            toola:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="年月(Date of Birth)："
+                android:textColor="#C0C0C0"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                toola:text="2024/05/30"
+                android:textColor="#000000"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!--号码-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvNumTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="证件号(Aadhaar Number)："
+                android:textColor="#C0C0C0"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvNum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                toola:text="8888 8888 8888"
+                android:textColor="#000000"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
