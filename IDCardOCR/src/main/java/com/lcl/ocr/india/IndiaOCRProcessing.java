@@ -56,7 +56,7 @@ public class IndiaOCRProcessing {
             String idCardNum = orderedData.get(i).replaceAll("\\s", "");// 去除空格
             // Aadhaar号码
             if (isAadhaarNumber(idCardNum)) {
-                hashMap.put("id", idCardNum);
+                hashMap.put("aadhaar_id", idCardNum);
                 break;
             }
         }
@@ -66,17 +66,17 @@ public class IndiaOCRProcessing {
         // 姓名
         String beforeName = "";
         boolean isVerifyName = false;
-        Log.e("文字识别", "=========识别开始=======");
+//        Log.e("文字识别", "=========识别开始=======");
         for (int i = 0; i < orderedData.size(); i++) {
             String textName = orderedData.get(i).replace(".", "");
-            Log.e("文字识别", textName);
+//            Log.e("文字识别", textName);
             if (isIndiaName(textName)) {
                 isVerifyName = true;
-                hashMap.put("name", textName);
+                hashMap.put("aadhaar_name", textName);
             }
             if (!isVerifyName && isIndiaName2(textName)) {
                 // 设置前一个保存的信息
-                hashMap.put("name", beforeName);
+                hashMap.put("aadhaar_name", beforeName);
             }
             if (textName.length() >= 4) {
                 beforeName = textName;
@@ -87,7 +87,7 @@ public class IndiaOCRProcessing {
         for (int i = 0; i < orderedData.size(); i++) {
             String genderInfo = getGenderInfo(orderedData.get(i));
             if (!genderInfo.isEmpty()) {
-                hashMap.put("gender", genderInfo);
+                hashMap.put("aadhaar_gender", genderInfo);
                 break;
             }
         }
@@ -96,11 +96,11 @@ public class IndiaOCRProcessing {
         for (int i = 0; i < orderedData.size(); i++) {
             String date = getDateInfo(orderedData.get(i));
             if (!date.isEmpty()) {
-                hashMap.put("date", date);
+                hashMap.put("aadhaar_date", date);
                 break;
             }
         }
-        Log.e("Aadhaar", "识别成功=======\n" + hashMap);
+//        Log.e("Aadhaar", "识别成功=======\n" + hashMap);
         return hashMap;
     }
 
@@ -240,7 +240,7 @@ public class IndiaOCRProcessing {
                     date = dateOnly;
                 }
             }
-            Log.e("日期", "=======匹配成功=======" + date);
+//            Log.e("日期", "=======匹配成功=======" + date);
             return date;
         }
         return "";
@@ -322,7 +322,7 @@ public class IndiaOCRProcessing {
 
         List<String> orderedData = new ArrayList<>();
 
-        Log.e("文字识别", "=========识别开始=======");
+//        Log.e("文字识别", "=========识别开始=======");
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
                 Rect rect = line.getBoundingBox();
@@ -330,7 +330,7 @@ public class IndiaOCRProcessing {
 //                String lineTxt = line.getText().toLowerCase();
                 String lineTxt = line.getText();
                 if (isPanFilterInfo(lineTxt)) {
-                    Log.e("文字识别", lineTxt);
+//                    Log.e("文字识别", lineTxt);
                     orderedData.add(lineTxt);
                 }
             }
@@ -341,7 +341,7 @@ public class IndiaOCRProcessing {
             String idCardNum = orderedData.get(i).replaceAll("\\s", "");// 去除空格
             // Pan号码判断
             if (isPanNumber(idCardNum)) {
-                hashMap.put("id", idCardNum);
+                hashMap.put("pan_id", idCardNum);
                 break;
             }
         }
@@ -353,7 +353,7 @@ public class IndiaOCRProcessing {
             String textName = orderedData.get(i).replace(".", "");
 //            Log.e("文字识别", textName);
             if (isAllUpperCase(textName)) {
-                hashMap.put("name", textName);
+                hashMap.put("pan_name", textName);
                 break;
             }
         }

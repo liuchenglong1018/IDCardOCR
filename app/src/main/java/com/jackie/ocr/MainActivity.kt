@@ -108,11 +108,12 @@ class MainActivity : ComponentActivity() {
             IndiaOcrRecognizer.getInstance().getAadhaarInfo(imageBitmap, object :
                 OnOCRResultListener {
                 override fun onSuccess(ocrInfo: HashMap<String, String>?) {
+                    // 识别成功
                     setAadhaarCardInfo(ocrInfo, path, true)
                 }
 
                 override fun onFailure(e: Exception) {
-
+                    // 识别失败
                 }
             })
         }
@@ -134,24 +135,28 @@ class MainActivity : ComponentActivity() {
             if (hashMap != null) {
                 for (bean in hashMap) {
                     when (bean.key) {
-                        // 性别
-                        "gender" -> {
+                        // Aadhaar性别
+                        "aadhaar_gender" -> {
                             idBean.gender = bean.value
                         }
-                        // 年份
-                        "date" -> {
+                        // Aadhaar年月日or年
+                        "aadhaar_date" -> {
                             idBean.date = bean.value
                         }
-                        // 号码
-                        "id" -> {
+                        // Aadhaar号码
+                        "aadhaar_id" -> {
                             idBean.id = bean.value
                         }
-                        // 卡片类型
-                        "id_card_type" -> {
-                            idBean.id_card_type = bean.value
+                        // Aadhaar姓名
+                        "aadhaar_name" -> {
+                            idBean.name = bean.value
                         }
-                        // 姓名
-                        "name" -> {
+                        // Pan号码
+                        "pan_id" -> {
+                            idBean.id = bean.value
+                        }
+                        // Pan姓名
+                        "pan_name" -> {
                             idBean.name = bean.value
                         }
                     }
