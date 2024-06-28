@@ -86,9 +86,9 @@ afterEvaluate {
     android.libraryVariants.each {variant->
         publishing.publications.create(variant.name,MavenPublication){
             from components.findByName(variant.name)
-            groupId = 'com.github.liuchenglong1018'//自定义
-            artifactId = 'IDCardOCR'//自定义
-            version = '1.0.1'//自定义
+            groupId = 'com.github.liuchenglong1018'//GitHub用户名
+            artifactId = 'IDCardOCR'// 项目名
+            version = '1.0.0'// 版本号
         }
     }
 }
