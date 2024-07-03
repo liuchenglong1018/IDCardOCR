@@ -14,6 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "OCR-Demo"
+rootProject.name = "Lcl Ocr Sdk"
 include(":app")
 include(":IDCardOCR")

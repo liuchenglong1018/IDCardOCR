@@ -1,14 +1,17 @@
+
 plugins {
     id 'com.android.library'
     id 'maven-publish'
+//    id 'com.kezong.fat-aar'
 }
+//apply plugin: 'com.kezong.fat-aar'
 
 android {
     namespace 'com.lcl.ocr'
     compileSdk 33
 
     defaultConfig {
-        minSdk 24
+        minSdk 21
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -64,7 +67,9 @@ android {
 }
 
 dependencies {
+//    implementation fileTree(dir: 'libs', include: '*.jar')
 
+//    embed 'com.google.mlkit:text-recognition-devanagari:16.0.0'
     implementation 'com.google.mlkit:text-recognition-devanagari:16.0.0'
 }
 

@@ -10,6 +10,7 @@ import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognizerOptionsInterface;
 import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions;
 import com.lcl.ocr.OnOCRResultListener;
+import com.lcl.ocr.OnPhotoResultListener;
 import com.lcl.ocr.OnTextResultListener;
 import com.lcl.ocr.TextRecognizerResult;
 
@@ -85,7 +86,6 @@ public class IndiaOcrRecognizer {
         TextRecognizerOptionsInterface textRecognizerOptions = new DevanagariTextRecognizerOptions.Builder().build();
         TextRecognizerResult.getInstance()
                 .getTextResult(bitmap, textRecognizerOptions, new OnTextResultListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onSuccess(Text text) {
                         HashMap<String, String> aadhaarInfo = IndiaOCRProcessing.getAadhaarCardInfo(text);
@@ -106,11 +106,29 @@ public class IndiaOcrRecognizer {
         TextRecognizerOptionsInterface textRecognizerOptions = new DevanagariTextRecognizerOptions.Builder().build();
         TextRecognizerResult.getInstance()
                 .getTextResult(bitmap, textRecognizerOptions, new OnTextResultListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onSuccess(Text text) {
                         HashMap<String, String> panInfo = IndiaOCRProcessing.getPanCardInfo(text);
                         listener.onSuccess(panInfo);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        listener.onFailure(e);
+                    }
+                });
+    }
+
+    /**
+     * 相册图片
+     */
+    public void getPhotoAllInfo(@NonNull Bitmap bitmap, @NonNull OnPhotoResultListener listener) {
+        TextRecognizerOptionsInterface textRecognizerOptions = new DevanagariTextRecognizerOptions.Builder().build();
+        TextRecognizerResult.getInstance()
+                .getTextResult(bitmap, textRecognizerOptions, new OnTextResultListener() {
+                    @Override
+                    public void onSuccess(Text text) {
+                        listener.onSuccess(text.getText());
                     }
 
                     @Override

@@ -132,7 +132,28 @@
     public protected <methods>;
 }
 
+-keep class com.google.mlkit.vision.text.** { *; }
+-keep interface com.google.mlkit.vision.text.** { *; }
+
+# Google GMS
+#-keep public class com.google.android.gms.* { public *; }
+#-dontwarn com.google.android.gms.**
+
+# Google MLKit TextRecognizer
+-keep public class com.google.mlkit.vision.text.TextRecognizer { public *; }
+-keep public class com.google.mlkit.vision.text.TextRecognizer.** { public *; }
+-keep class com.google.mlkit.vision.text.TextRecognizer
+-keep class com.google.mlkit.vision.text.TextRecognizer.**
+#-dontwarn com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions$Builder
+#-dontwarn com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
+-dontwarn com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions$Builder
+-dontwarn com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
+#-dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions$Builder
+#-dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
+#-dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions$Builder
+#-dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
+
 # 变态混淆
--obfuscationdictionary bt-proguard.txt
--classobfuscationdictionary bt-proguard.txt
--packageobfuscationdictionary bt-proguard.txt
+#-obfuscationdictionary bt-proguard.txt
+#-classobfuscationdictionary bt-proguard.txt
+#-packageobfuscationdictionary bt-proguard.txt

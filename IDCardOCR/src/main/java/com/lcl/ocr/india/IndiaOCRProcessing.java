@@ -1,15 +1,9 @@
 package com.lcl.ocr.india;
 
 import android.graphics.Rect;
-import android.os.Build;
-import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import com.google.mlkit.vision.text.Text;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +14,6 @@ import java.util.regex.Pattern;
 /**
  * 印度OCR India
  */
-@RequiresApi(api = Build.VERSION_CODES.O)
 public class IndiaOCRProcessing {
 
     /**
@@ -30,7 +23,6 @@ public class IndiaOCRProcessing {
     /**
      * 获取Aadhaar卡片信息
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static HashMap<String, String> getAadhaarCardInfo(Text text) {
         List<Text.TextBlock> blockList = text.getTextBlocks();
         if (blockList.size() == 0) {
@@ -38,18 +30,24 @@ public class IndiaOCRProcessing {
         }
         HashMap<String, String> hashMap = new HashMap<>();
 
-        // 过滤所有数据
+        // 过滤后的所有数据
         List<String> orderedData = new ArrayList<>();
+
+        StringBuilder filterText = new StringBuilder();
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
                 Rect rect = line.getBoundingBox();
                 String y = String.valueOf(rect.exactCenterY());
                 String lineTxt = line.getText();
                 if (isAadhaarFilterInfo(lineTxt)) {
+                    filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
                 }
             }
         }
+
+        // 识别出的文字
+        hashMap.put("aadhaar_text", filterText.toString());
 
         // 设置唯一ID
         for (int i = 0; i < orderedData.size(); i++) {
@@ -68,18 +66,19 @@ public class IndiaOCRProcessing {
         boolean isVerifyName = false;
 //        Log.e("文字识别", "=========识别开始=======");
         for (int i = 0; i < orderedData.size(); i++) {
-            String textName = orderedData.get(i).replace(".", "");
-//            Log.e("文字识别", textName);
-            if (isIndiaName(textName)) {
+            String textName1 = orderedData.get(i).replace(",", "");
+            String textName2 = textName1.replace(".", "");
+//            Log.e("文字识别", textName2);
+            if (isIndiaName(textName2)) {
                 isVerifyName = true;
-                hashMap.put("aadhaar_name", textName);
+                hashMap.put("aadhaar_name", textName2);
             }
-            if (!isVerifyName && isIndiaName2(textName)) {
+            if (!isVerifyName && isIndiaName2(textName2)) {
                 // 设置前一个保存的信息
                 hashMap.put("aadhaar_name", beforeName);
             }
-            if (textName.length() >= 4) {
-                beforeName = textName;
+            if (textName2.length() >= 4) {
+                beforeName = textName2;
             }
         }
 
@@ -184,14 +183,14 @@ public class IndiaOCRProcessing {
                 || str.contains("FEMALE")
                 || str.contains("/FE")
                 || str.contains("/Fe")) {
-            return "Female";
+            return "F";
         }
         if (str.contains("male")
                 || str.contains("Male")
                 || str.contains("MALE")
                 || str.contains("/MA")
                 || str.contains("/Ma")) {
-            return "Male";
+            return "M";
         }
         return "";
     }
@@ -199,7 +198,6 @@ public class IndiaOCRProcessing {
     /**
      * 出生日期
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private static String getDateInfo(String str) {
         if (str == null || str.isEmpty()) {
             return "";
@@ -249,14 +247,22 @@ public class IndiaOCRProcessing {
     /**
      * 时间格式处理
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private static String parseDate(String input) {
         List<String> patterns = Arrays.asList(
-                "(\\d{2})/(\\d{2})/(\\d{4})", // dd/MM/yyyy
-                "(\\d{2})(\\d{2})(\\d{4})",   // ddMMyyyy
-                "(\\d{2})/(\\d{2})(\\d{4})",   // dd/MMyyyy
-                "(\\d{2})(\\d{2})/(\\d{4})",   // ddMM/yyyy
-                "YearofBirth:(\\d{4})"        // 只包含年份
+                "(\\d{2})/(\\d{2})/(\\d{4})",   // dd/MM/yyyy
+                "(\\d{2})(\\d{2})(\\d{4})",     // ddMMyyyy
+                "(\\d{2})/(\\d{2})(\\d{4})",    // dd/MMyyyy
+                "(\\d{2})(\\d{2})/(\\d{4})",    // ddMM/yyyy
+                "Year of Birth (\\d{4})",       // 只包含年份
+                "Year of Birth: (\\d{4})",       // 只包含年份
+                "Year of Birth:(\\d{4})",       // 只包含年份
+                "Year of Birth(\\d{4})",       // 只包含年份
+                "Birth (\\d{4})",               // 只包含年份
+                "Birth: (\\d{4})",               // 只包含年份
+                "Birth(\\d{4})",               // 只包含年份
+                "irth (\\d{4})",               // 只包含年份
+                "irth(\\d{4})",               // 只包含年份
+                "YearofBirth:(\\d{4})"          // 只包含年份
         );
         for (String pattern : patterns) {
             Matcher matcher = Pattern.compile(pattern).matcher(input);
@@ -270,8 +276,11 @@ public class IndiaOCRProcessing {
                         // 补全两位数的月和日
                         if (day.length() == 1) day = "0" + day;
                         if (month.length() == 1) month = "0" + month;
-                        String dateStr = day + "/" + month + "/" + year;
-                        LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        // 日/月/年
+//                        String dateStr = day + "/" + month + "/" + year;
+                        // 年/月/日
+                        String dateStr = year + "-" + month + "-" + day;
+//                        Log.e("日期", "获取到===========" + dateStr);
                         return dateStr;
                     } catch (Exception e) {
                         // 忽略无效的日期字符串
@@ -320,8 +329,10 @@ public class IndiaOCRProcessing {
         }
         HashMap<String, String> hashMap = new HashMap<>();
 
+        // 过滤后的所有数据
         List<String> orderedData = new ArrayList<>();
 
+        StringBuilder filterText = new StringBuilder();
 //        Log.e("文字识别", "=========识别开始=======");
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
@@ -331,32 +342,39 @@ public class IndiaOCRProcessing {
                 String lineTxt = line.getText();
                 if (isPanFilterInfo(lineTxt)) {
 //                    Log.e("文字识别", lineTxt);
+                    filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
                 }
+            }
+        }
+        // 识别出的文字
+        hashMap.put("pan_text", filterText.toString());
+
+        // 姓名
+        String name = "";
+        for (int i = 0; i < orderedData.size(); i++) {
+            String textName1 = orderedData.get(i).replace(",", "");
+            String textName2 = textName1.replace(".", "");
+//            Log.e("文字识别", textName2);
+            if (isAllUpperCase(textName2)) {
+                name = textName2;
+                hashMap.put("pan_name", textName2);
+                break;
             }
         }
 
         // 设置唯一ID
         for (int i = 0; i < orderedData.size(); i++) {
+            String nameComparison = name.replaceAll("\\s", "");// 去除空格
             String idCardNum = orderedData.get(i).replaceAll("\\s", "");// 去除空格
             // Pan号码判断
-            if (isPanNumber(idCardNum)) {
+            if (!nameComparison.equals(idCardNum) && isPanNumber(idCardNum)) {
                 hashMap.put("pan_id", idCardNum);
                 break;
             }
         }
         // 卡片类型
 //        listText.add(new TextTypeBean("id_card_type", "2"));
-
-        // 姓名
-        for (int i = 0; i < orderedData.size(); i++) {
-            String textName = orderedData.get(i).replace(".", "");
-//            Log.e("文字识别", textName);
-            if (isAllUpperCase(textName)) {
-                hashMap.put("pan_name", textName);
-                break;
-            }
-        }
         return hashMap;
     }
 
