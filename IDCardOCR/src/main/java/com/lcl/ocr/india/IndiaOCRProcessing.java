@@ -1,6 +1,7 @@
 package com.lcl.ocr.india;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.google.mlkit.vision.text.Text;
 
@@ -33,13 +34,15 @@ public class IndiaOCRProcessing {
         // 过滤后的所有数据
         List<String> orderedData = new ArrayList<>();
 
+        Log.e("文字识别", "=========识别开始=======");
         StringBuilder filterText = new StringBuilder();
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
-                Rect rect = line.getBoundingBox();
-                String y = String.valueOf(rect.exactCenterY());
+//                Rect rect = line.getBoundingBox();
+//                String y = String.valueOf(rect.exactCenterY());
                 String lineTxt = line.getText();
                 if (isAadhaarFilterInfo(lineTxt)) {
+                    Log.e("文字识别", lineTxt);
                     filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
                 }
@@ -64,7 +67,6 @@ public class IndiaOCRProcessing {
         // 姓名
         String beforeName = "";
         boolean isVerifyName = false;
-//        Log.e("文字识别", "=========识别开始=======");
         for (int i = 0; i < orderedData.size(); i++) {
             String textName1 = orderedData.get(i).replace(",", "");
             String textName2 = textName1.replace(".", "");
@@ -95,6 +97,7 @@ public class IndiaOCRProcessing {
         for (int i = 0; i < orderedData.size(); i++) {
             String date = getDateInfo(orderedData.get(i));
             if (!date.isEmpty()) {
+//                Log.e("日期", "=======Aadhaar=======" + date);
                 hashMap.put("aadhaar_date", date);
                 break;
             }
@@ -238,8 +241,9 @@ public class IndiaOCRProcessing {
                     date = dateOnly;
                 }
             }
-//            Log.e("日期", "=======匹配成功=======" + date);
-            return date;
+            if (isDatePureNum(date)) {
+                return date;
+            }
         }
         return "";
     }
@@ -248,6 +252,9 @@ public class IndiaOCRProcessing {
      * 时间格式处理
      */
     private static String parseDate(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
         List<String> patterns = Arrays.asList(
                 "(\\d{2})/(\\d{2})/(\\d{4})",   // dd/MM/yyyy
                 "(\\d{2})(\\d{2})(\\d{4})",     // ddMMyyyy
@@ -316,6 +323,34 @@ public class IndiaOCRProcessing {
     }
 
     /**
+     * 判断时间是否是纯数字
+     * @return 如果字符串是由纯数字组成，则返回true；否则返回false
+     */
+    private static boolean isDatePureNum(String input) {
+        if (input == null || input.isEmpty()) {
+            return false;
+        }
+        String date = removeSlashes(input);
+        return date.matches("\\d+");
+    }
+
+    /**
+     * 去除所有'/'或'\'字符
+     */
+    private static String removeSlashes(String input) {
+        // 使用StringBuilder来构建结果字符串，因为它比字符串连接更高效
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            // 如果字符不是'/'或'\'，则添加到StringBuilder中
+            if (c != '/' && c != '\\' && c != '-') {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
      * =============================== Pan卡片 ===============================
      */
 
@@ -332,12 +367,12 @@ public class IndiaOCRProcessing {
         // 过滤后的所有数据
         List<String> orderedData = new ArrayList<>();
 
-        StringBuilder filterText = new StringBuilder();
 //        Log.e("文字识别", "=========识别开始=======");
+        StringBuilder filterText = new StringBuilder();
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
-                Rect rect = line.getBoundingBox();
-                String y = String.valueOf(rect.exactCenterY());
+//                Rect rect = line.getBoundingBox();
+//                String y = String.valueOf(rect.exactCenterY());
 //                String lineTxt = line.getText().toLowerCase();
                 String lineTxt = line.getText();
                 if (isPanFilterInfo(lineTxt)) {
@@ -373,6 +408,17 @@ public class IndiaOCRProcessing {
                 break;
             }
         }
+
+        // 日期
+        for (int i = 0; i < orderedData.size(); i++) {
+            String date = orderedData.get(i).replaceAll("\\s", "");// 去除空格
+            String parseDate = parsePanDate(date);
+            if (isDatePureNum(parseDate)) {
+//                Log.e("日期", "=======Pan=======" + parseDate);
+                hashMap.put("pan_date", parseDate);
+            }
+        }
+
         // 卡片类型
 //        listText.add(new TextTypeBean("id_card_type", "2"));
         return hashMap;
@@ -382,13 +428,32 @@ public class IndiaOCRProcessing {
      * Pan号码正则，或者长度为10,并且需要包含数字和大写英文
      */
     private static boolean isPanNumber(String str) {
+        if (str == null || str.isEmpty() || str.length() != 10) {
+            return false;
+        }
         // Pan号码正则
         String panNumRegular = "(?i:\\b[A-Z]{3}[ABCFGHJLPT][A-Z]\\d{4}[A-Z]\\b)";
         if (str.matches(panNumRegular)) {
             return true;
         }
-        String regex = "^[A-Z0-9]{10}$";
-        return str.matches(regex);
+        int upperCaseCount = 0;
+        int digitCount = 0;
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (Character.isUpperCase(c)) {
+                // 是大写英文字母
+                upperCaseCount++;
+            } else if (Character.isDigit(c)) {
+                // 是数字
+                digitCount++;
+            } else {
+                // 包含其他字符
+                return false;
+            }
+        }
+        // 检查大写英文字母至少6位，数字至少4位
+        return upperCaseCount >= 6 && digitCount >= 4;
     }
 
     /**
@@ -443,6 +508,47 @@ public class IndiaOCRProcessing {
         // 印地语字符的Unicode范围
         String gujaratiUnicodeRange = "[\u0A81-\u0AEF\u0AEE\u0A83]";
         return input.matches(".*?" + gujaratiUnicodeRange + ".*");
+    }
+
+    /**
+     * 时间格式处理
+     */
+    private static String parsePanDate(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
+        List<String> patterns = Arrays.asList(
+                "(\\d{2})/(\\d{2})/(\\d{4})"   // dd/MM/yyyy
+        );
+        for (String pattern : patterns) {
+            Matcher matcher = Pattern.compile(pattern).matcher(input);
+            if (matcher.find()) {
+                if (matcher.groupCount() == 3) {
+                    try {
+                        // dd/MM/yyyy 或 ddMMyyyy 格式
+                        String day = matcher.group(1);
+                        String month = matcher.groupCount() > 1 ? matcher.group(2) : "0" + day.substring(0, 1); // 假设ddMMyyyy格式时，第二位是月份
+                        String year = matcher.group(3);
+                        // 补全两位数的月和日
+                        if (day.length() == 1) day = "0" + day;
+                        if (month.length() == 1) month = "0" + month;
+                        // 日/月/年
+//                        String dateStr = day + "/" + month + "/" + year;
+                        // 年/月/日
+                        String dateStr = year + "-" + month + "-" + day;
+//                        Log.e("日期", "获取到===========" + dateStr);
+                        return dateStr;
+                    } catch (Exception e) {
+                        // 忽略无效的日期字符串
+//                        Log.e("日期", "失败原因：" + e.getMessage());
+                    }
+                } else if (matcher.groupCount() == 1) {
+                    // 只包含年份的情况
+                    return matcher.group(1);
+                }
+            }
+        }
+        return ""; // 没有找到匹配的日期格式
     }
 
     /**

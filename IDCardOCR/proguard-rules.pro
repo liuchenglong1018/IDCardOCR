@@ -154,6 +154,6 @@
 #-dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 
 # 变态混淆
-#-obfuscationdictionary bt-proguard.txt
-#-classobfuscationdictionary bt-proguard.txt
-#-packageobfuscationdictionary bt-proguard.txt
+-obfuscationdictionary bt-proguard.txt
+-classobfuscationdictionary bt-proguard.txt
+-packageobfuscationdictionary bt-proguard.txt

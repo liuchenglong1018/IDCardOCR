@@ -137,4 +137,21 @@ public class IndiaOcrRecognizer {
                     }
                 });
     }
+
+    // 筛选日期
+//    private static HashMap<String, String> filterDate(
+//            HashMap<String, String> aadhaarMap,
+//            HashMap<String, String> panMap
+//    ) {
+//        HashMap<String, String> map = new HashMap<>();
+//        if (aadhaarMap != null || panMap == null) {
+//            return map;
+//        }
+//        for (String key : aadhaarMap.keySet()) {
+//
+//        }
+//
+//        return map;
+//    }
+
 }
