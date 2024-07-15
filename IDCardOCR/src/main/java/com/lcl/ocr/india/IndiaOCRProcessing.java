@@ -1,6 +1,5 @@
 package com.lcl.ocr.india;
 
-import android.graphics.Rect;
 import android.util.Log;
 
 import com.google.mlkit.vision.text.Text;
@@ -34,7 +33,7 @@ public class IndiaOCRProcessing {
         // 过滤后的所有数据
         List<String> orderedData = new ArrayList<>();
 
-        Log.e("文字识别", "=========识别开始=======");
+//        Log.e("文字识别", "=========识别开始=======");
         StringBuilder filterText = new StringBuilder();
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
@@ -42,7 +41,7 @@ public class IndiaOCRProcessing {
 //                String y = String.valueOf(rect.exactCenterY());
                 String lineTxt = line.getText();
                 if (isAadhaarFilterInfo(lineTxt)) {
-                    Log.e("文字识别", lineTxt);
+//                    Log.e("文字识别", lineTxt);
                     filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
                 }
@@ -122,9 +121,30 @@ public class IndiaOCRProcessing {
                 && !str.contains("GOVERNMENT OF")
                 && !str.contains("GOVERNMENTOF")
                 && !str.contains("OFINDIA")
+                && !str.contains("MERI PEHCHAN")
+                && !str.contains("AADHAAR")
+                && !str.contains("AADHAAR MERI")
+                && !str.contains("MERA AADHAAR MERI")
+                && !str.contains("MERA AADHAAR, MERI PEHCHAN")
+                && !str.contains("proof of")
+                && !str.contains("of identity")
+                && !str.contains("Aadhaar is proof of identity not of citizenship")
+                && !str.contains("Aadhaar is")
+                && !str.contains("Aadhaar")
+                && !str.contains("Fathe")
+                && !str.contains("of citizenship")
+                && !str.contains("or date of birth")
+                && !str.contains("should be")
+                && !str.contains("with verification")
+                && !str.contains("QR code")
+                && !str.contains("It shou")
+                && !str.contains("used with verification")
+                && !str.contains("(online")
+                && !str.contains("XML")
                 && !str.contains("India")
                 && !str.contains("INDIA")
                 && !str.contains("india")
+                && !str.contains("Enrollment No")
                 && !str.contains("Issue Date")
                 && !str.contains("Issue");
     }
@@ -158,7 +178,12 @@ public class IndiaOCRProcessing {
                 && !str.contains("india")
                 && !str.contains("vernme")
                 && !str.contains("Male")
+                && !str.contains("male")
+                && !str.contains("MALE")
                 && !str.contains("Female")
+                && !str.contains("FEMALE")
+                && !str.contains("Date")
+                && !str.contains("Dete")
                 && !str.contains("GOVERRNT CBDES")
                 && !str.contains("GOVERRNT");
     }
@@ -192,6 +217,11 @@ public class IndiaOCRProcessing {
                 || str.contains("Male")
                 || str.contains("MALE")
                 || str.contains("/MA")
+                || str.contains("/ALE")
+                || str.contains("/ ALE")
+                || str.contains("/ MAE")
+                || str.contains("MAL")
+                || str.contains("MAE")
                 || str.contains("/Ma")) {
             return "M";
         }
@@ -210,30 +240,26 @@ public class IndiaOCRProcessing {
                 || str.contains("Birth")
                 || str.contains("birth")
                 || str.contains("DOB")
+                || str.contains("B:")
+                || str.contains("8:")
                 || str.contains("/DO")) {
             // 去除所有空格
             String text = str.replaceAll("\\s", "");
             // 符号识别错误转换
-            String branchStr = "";
             if (text.contains(";")) {
-                branchStr = text.replace(";", ":");
-            } else {
-                branchStr = text;
+                text = text.replace(";", ":");
             }
             // 符号识别错误转换
-            String dotStr = "";
-            if (branchStr.contains(".")) {
-                dotStr = branchStr.replace(".", ":");
-            } else {
-                dotStr = branchStr;
+            if (text.contains(".")) {
+                text = text.replace(".", ":");
             }
 //            Log.e("日期", "=======匹配成功======="+ dotStr);
 
             // 第一次匹配，成功直接返回
-            String date = parseDate(dotStr);
+            String date = parseDate(text);
             if (date.isEmpty()) {
                 // 第一次匹配为空，采用截取的方式匹配第二次
-                String dateOnly = extractDateOnly(dotStr);
+                String dateOnly = extractDateOnly(text);
                 // 通过截取的日期，再格式化一下
                 date = parseDate(dateOnly);
                 if (date.isEmpty()) {
@@ -284,9 +310,9 @@ public class IndiaOCRProcessing {
                         if (day.length() == 1) day = "0" + day;
                         if (month.length() == 1) month = "0" + month;
                         // 日/月/年
-//                        String dateStr = day + "/" + month + "/" + year;
+                        String dateStr = day + "/" + month + "/" + year;
                         // 年/月/日
-                        String dateStr = year + "-" + month + "-" + day;
+//                        String dateStr = year + "-" + month + "-" + day;
 //                        Log.e("日期", "获取到===========" + dateStr);
                         return dateStr;
                     } catch (Exception e) {
@@ -375,7 +401,7 @@ public class IndiaOCRProcessing {
 //                String y = String.valueOf(rect.exactCenterY());
 //                String lineTxt = line.getText().toLowerCase();
                 String lineTxt = line.getText();
-                if (isPanFilterInfo(lineTxt)) {
+                if (isPanFilterInfo(lineTxt) && isAadhaarFilterInfo(lineTxt)) {
 //                    Log.e("文字识别", lineTxt);
                     filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
@@ -470,6 +496,7 @@ public class IndiaOCRProcessing {
                 && !str.contains("TAXDEPARTMENT")
                 && !str.contains("DEPARTMENT")
                 && !str.contains("INCOME")
+                && !str.contains("Permanent")
                 && !str.contains("Permanent Account Number")
                 && !str.contains("Permanent Account")
                 && !str.contains("Account Number")
@@ -533,9 +560,9 @@ public class IndiaOCRProcessing {
                         if (day.length() == 1) day = "0" + day;
                         if (month.length() == 1) month = "0" + month;
                         // 日/月/年
-//                        String dateStr = day + "/" + month + "/" + year;
+                        String dateStr = day + "/" + month + "/" + year;
                         // 年/月/日
-                        String dateStr = year + "-" + month + "-" + day;
+//                        String dateStr = year + "-" + month + "-" + day;
 //                        Log.e("日期", "获取到===========" + dateStr);
                         return dateStr;
                     } catch (Exception e) {

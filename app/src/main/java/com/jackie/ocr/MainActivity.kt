@@ -103,10 +103,9 @@ class MainActivity : ComponentActivity() {
         val photoList = getAllPhoto()
         imgSize = photoList.size
         for (path in photoList) {
-            // 图片地址转Bitmap
-            val imageBitmap = BitmapFactory.decodeFile(path)
-            IndiaOcrRecognizer.getInstance().getAadhaarInfo(imageBitmap, object :
-//            IndiaOcrRecognizer.getInstance().getPanInfo(imageBitmap, object :
+            // 开始识别
+//            IndiaOcrRecognizer.getInstance().getAadhaarInfo(path, object :
+            IndiaOcrRecognizer.getInstance().getPanInfo(path, object :
                 OnOCRResultListener {
                 override fun onSuccess(ocrInfo: HashMap<String, String>?) {
                     // 识别成功
@@ -140,13 +139,17 @@ class MainActivity : ComponentActivity() {
                         "aadhaar_gender" -> {
                             idBean.gender = bean.value
                         }
+                        // 日期
+                        "dateOfBirth" -> {
+                            idBean.date = bean.value
+                        }
                         // Aadhaar年月日or年
-                        "aadhaar_date" -> {
-                            idBean.date = bean.value
-                        }
-                        "pan_date" -> {
-                            idBean.date = bean.value
-                        }
+//                        "aadhaar_date" -> {
+//                            idBean.date = bean.value
+//                        }
+//                        "pan_date" -> {
+//                            idBean.date = bean.value
+//                        }
                         // Aadhaar号码
                         "aadhaar_id" -> {
                             idBean.id = bean.value
