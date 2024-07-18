@@ -91,7 +91,7 @@ afterEvaluate {
             from components.findByName(variant.name)
             groupId = 'com.github.liuchenglong1018'//GitHub用户名
             artifactId = 'IDCardOCR'// 项目名
-            version = '1.2.0'// 版本号
+            version = '1.2.1'// 版本号
         }
     }
 }
