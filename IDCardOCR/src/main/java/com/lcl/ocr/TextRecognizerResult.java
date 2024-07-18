@@ -5,11 +5,7 @@ import android.graphics.BitmapFactory;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.TextRecognizerOptionsInterface;
@@ -49,7 +45,11 @@ public class TextRecognizerResult {
             InputImage image = InputImage.fromBitmap(bitmap, rotationAngle);
             recognizer.process(image)
                     .addOnSuccessListener(text -> {
-                        listener.onSuccess(text);
+                        if (text.getTextBlocks().size() == 0) {
+                            listener.onFailure(new Exception("Failure to identify, please try again"));
+                        } else {
+                            listener.onSuccess(text);
+                        }
                         recognizer.close();
                     })
                     .addOnFailureListener(
@@ -58,7 +58,7 @@ public class TextRecognizerResult {
                                 recognizer.close();
                             });
         } catch (Exception e) {
-            listener.onFailure(new Exception("Identification failure"));
+            listener.onFailure(new Exception("Failure to identify, please try again"));
         }
 
     }

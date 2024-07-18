@@ -1,6 +1,5 @@
 package com.lcl.ocr.india;
 
-import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 

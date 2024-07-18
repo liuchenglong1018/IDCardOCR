@@ -3,12 +3,16 @@ package com.jackie.ocr.util;
 import android.net.ParseException;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DateUtils {
 
@@ -422,7 +426,4 @@ public class DateUtils {
         }
         return  ret;
     }
-
-
-
 }

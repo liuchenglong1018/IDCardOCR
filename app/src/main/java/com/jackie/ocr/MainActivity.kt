@@ -2,10 +2,10 @@ package com.jackie.ocr
 
 import android.annotation.SuppressLint
 import android.database.Cursor
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
@@ -19,6 +19,7 @@ import com.jackie.ocr.bean.IDBean
 import com.jackie.ocr.databinding.ActivityMainBinding
 import com.lcl.ocr.OnOCRResultListener
 import com.lcl.ocr.india.IndiaOcrRecognizer
+import com.lcl.ocr.util.StringUtils
 
 class MainActivity : ComponentActivity() {
 
@@ -59,6 +60,8 @@ class MainActivity : ComponentActivity() {
                 .start()
         }
         setPermissions()
+
+        test()
     }
 
     private fun setPermissions() {
@@ -109,11 +112,13 @@ class MainActivity : ComponentActivity() {
                 OnOCRResultListener {
                 override fun onSuccess(ocrInfo: HashMap<String, String>?) {
                     // 识别成功
+//                    Log.e(TAG,"识别成功" + ocrInfo.toString())
                     setAadhaarCardInfo(ocrInfo, path, true)
                 }
 
                 override fun onFailure(e: Exception) {
                     // 识别失败
+//                    Log.e(TAG,"识别失败" + e.message)
                 }
             })
         }
@@ -215,5 +220,20 @@ class MainActivity : ComponentActivity() {
             imageCursor.close()
         }
         return imagesList
+    }
+
+    private fun test() {
+        val inputs = arrayOf(
+            "BVZPHO411B",
+            "০KLPS1৪06K",
+            "8UNHJo4110",
+            "0৪SNF0Oo০V",
+            "AUHPJO696C"
+        )
+
+        for (input in inputs) {
+            val result: String = StringUtils.panNumModifySpecialStr(input)
+            Log.e("日期转换","转换前: $input, ===转换后: $result")
+        }
     }
 }
