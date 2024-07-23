@@ -1,18 +1,20 @@
 package com.lcl.ocr.india;
 
+import static com.lcl.ocr.util.StringUtils.aIsNumber;
+import static com.lcl.ocr.util.StringUtils.aNameReplace;
 import static com.lcl.ocr.util.StringUtils.containsGujaratiChars;
 import static com.lcl.ocr.util.StringUtils.isAllUpperCase;
 import static com.lcl.ocr.util.StringUtils.isDatePureNum;
 import static com.lcl.ocr.util.StringUtils.isNumeric;
-
-import android.util.Log;
+import static com.lcl.ocr.util.StringUtils.pIsCardNum;
+import static com.lcl.ocr.util.StringUtils.pNameReplace;
+import static com.lcl.ocr.util.StringUtils.removeAllSpace;
 
 import com.google.mlkit.vision.text.Text;
 import com.lcl.ocr.util.DateUtils;
 import com.lcl.ocr.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,7 +47,7 @@ public class IndiaOCRProcessing {
 //                Rect rect = line.getBoundingBox();
 //                String y = String.valueOf(rect.exactCenterY());
                 String lineTxt = line.getText();
-                if (isAadhaarFilterInfo(lineTxt)) {
+                if (aIsFilterSpamInfo(lineTxt)) {
 //                    Log.e("文字识别", lineTxt);
                     filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
@@ -58,9 +60,9 @@ public class IndiaOCRProcessing {
 
         // 设置唯一ID
         for (int i = 0; i < orderedData.size(); i++) {
-            String idCardNum = orderedData.get(i).replaceAll("\\s", "");// 去除空格
+            String idCardNum = removeAllSpace(orderedData.get(i));// 去除空格
             // Aadhaar号码
-            if (isAadhaarNumber(idCardNum)) {
+            if (aIsNumber(idCardNum)) {
                 hashMap.put("aadhaar_id", idCardNum);
                 break;
             }
@@ -72,25 +74,24 @@ public class IndiaOCRProcessing {
         String beforeName = "";
         boolean isVerifyName = false;
         for (int i = 0; i < orderedData.size(); i++) {
-            String textName1 = orderedData.get(i).replace(",", "");
-            String textName2 = textName1.replace(".", "");
-//            Log.e("文字识别", textName2);
-            if (isIndiaName(textName2)) {
+            String textName = aNameReplace(orderedData.get(i));
+//            Log.e("文字识别", textName);
+            if (aIsNameRule(textName)) {
                 isVerifyName = true;
-                hashMap.put("aadhaar_name", textName2);
+                hashMap.put("aadhaar_name", textName);
             }
-            if (!isVerifyName && isIndiaName2(textName2)) {
+            if (!isVerifyName && aNameFilterDateInfo(textName)) {
                 // 设置前一个保存的信息
                 hashMap.put("aadhaar_name", beforeName);
             }
-            if (textName2.length() >= 4) {
-                beforeName = textName2;
+            if (textName.length() >= 4) {
+                beforeName = textName;
             }
         }
 
         // 设置性别
         for (int i = 0; i < orderedData.size(); i++) {
-            String genderInfo = getGenderInfo(orderedData.get(i));
+            String genderInfo = aGenderInfo(orderedData.get(i));
             if (!genderInfo.isEmpty()) {
                 hashMap.put("aadhaar_gender", genderInfo);
                 break;
@@ -99,7 +100,7 @@ public class IndiaOCRProcessing {
 
         // 出生年月
         for (int i = 0; i < orderedData.size(); i++) {
-            String date = getAadhaarDateInfo(orderedData.get(i));
+            String date = aDateInfo(orderedData.get(i));
             if (!date.isEmpty()) {
 //                Log.e("日期", "=======Aadhaar=======" + date);
                 hashMap.put("aadhaar_date", date);
@@ -113,7 +114,7 @@ public class IndiaOCRProcessing {
     /**
      * Aadhaar过滤垃圾信息
      */
-    private static boolean isAadhaarFilterInfo(String str) {
+    private static boolean aIsFilterSpamInfo(String str) {
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -170,20 +171,9 @@ public class IndiaOCRProcessing {
     }
 
     /**
-     * Aadhaar号则，带空格和不带空格的校验
-     */
-    private static boolean isAadhaarNumber(String str) {
-        // 不带空格正则
-        String aadhaarNumRegular = "\\b[2-9][0-9]{11}\\b";
-        // 带空格正则
-        String aadhaarNumSpaceRegular = "\\b[2-9][0-9]{3} [0-9]{4} [0-9]{4}\\b";
-        return str.matches(aadhaarNumRegular) || str.matches(aadhaarNumSpaceRegular);
-    }
-
-    /**
      * 印度名字规则
      */
-    private static boolean isIndiaName(String str) {
+    private static boolean aIsNameRule(String str) {
         if (str == null || str.length() < 4) {
             return false;
         }
@@ -210,7 +200,10 @@ public class IndiaOCRProcessing {
                 && !str.contains("GOVERRNT");
     }
 
-    private static boolean isIndiaName2(String str) {
+    /**
+     * 过滤日期信息
+     */
+    private static boolean aNameFilterDateInfo(String str) {
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -224,7 +217,7 @@ public class IndiaOCRProcessing {
     /**
      * 性别规则
      */
-    private static String getGenderInfo(String str) {
+    private static String aGenderInfo(String str) {
         if (str == null || str.isEmpty()) {
             return "";
         }
@@ -253,7 +246,7 @@ public class IndiaOCRProcessing {
     /**
      * Aadhaar卡：出生日期
      */
-    private static String getAadhaarDateInfo(String str) {
+    private static String aDateInfo(String str) {
         if (str == null || str.isEmpty()) {
             return "";
         }
@@ -266,24 +259,24 @@ public class IndiaOCRProcessing {
                 || str.contains("8:")
                 || str.contains("/DO")) {
             // 去除所有空格
-            String text = str.replaceAll("\\s", "");
+            String text = removeAllSpace(str);
             // 符号识别错误转换
             if (text.contains(";")) {
-                text = text.replace(";", ":");
+                text = StringUtils.singleReplace(text, ";", ":");
             }
             // 符号识别错误转换
             if (text.contains(".")) {
-                text = text.replace(".", ":");
+                text = StringUtils.singleReplace(text,".", ":");
             }
 //            Log.e("日期", "=======匹配成功======="+ dotStr);
 
             // 第一次匹配，成功直接返回
-            String date = DateUtils.parseAadhaarDate(text);
+            String date = DateUtils.aParseDate(text);
             if (date.isEmpty()) {
                 // 第一次匹配为空，采用截取的方式匹配第二次
-                String dateOnly = extractDateOnly(text);
+                String dateOnly = StringUtils.aExtractDateOnly(text);
                 // 通过截取的日期，再格式化一下
-                date = DateUtils.parseAadhaarDate(dateOnly);
+                date = DateUtils.aParseDate(dateOnly);
 //                if (date.isEmpty() && !dateOnly.isEmpty()) {
 //                    // 第二次格式化为空，把截取的内容直接返回回去
 //                    date = dateOnly;
@@ -295,27 +288,6 @@ public class IndiaOCRProcessing {
         }
         return "";
     }
-
-    /**
-     * 截取字段
-     */
-    private static String extractDateOnly(String input) {
-        // 截取格式，这里根据识别文字的事迹情况来添加格式
-        List<String> patternList = Arrays.asList(
-                ":", "DOB", "OB", "Birth", "rth", "th", "DO8", "O8"
-        );
-        for (String pattern : patternList) {
-            if (input.contains(pattern)) {
-                return input.substring(input.indexOf(pattern) + 1).trim();
-            }
-        }
-        // 极端情况下没有截取到
-        // 这里可以根据实际情况添加更复杂的逻辑来提取日期部分
-        // 例如，使用正则表达式查找符合日期格式的部分
-        // 我这里用的是，移除非数字和斜杠的字符
-        return input.replaceAll("[^\\d/]", "").trim();
-    }
-
 
 
     /**
@@ -335,7 +307,7 @@ public class IndiaOCRProcessing {
         // 过滤后的所有数据
         List<String> orderedData = new ArrayList<>();
 
-        Log.e("文字识别", "=========识别开始=======");
+//        Log.e("文字识别", "=========识别开始=======");
         StringBuilder filterText = new StringBuilder();
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
@@ -343,8 +315,8 @@ public class IndiaOCRProcessing {
 //                String y = String.valueOf(rect.exactCenterY());
 //                String lineTxt = line.getText().toLowerCase();
                 String lineTxt = line.getText();
-                if (isPanFilterInfo(lineTxt) && isAadhaarFilterInfo(lineTxt)) {
-                    Log.e("文字识别", lineTxt);
+                if (pIsFilterSpamInfo(lineTxt) && aIsFilterSpamInfo(lineTxt)) {
+//                    Log.e("文字识别", lineTxt);
                     filterText.insert(0, lineTxt + "\n");
                     orderedData.add(lineTxt);
                 }
@@ -356,22 +328,21 @@ public class IndiaOCRProcessing {
         // 姓名
         String name = "";
         for (int i = 0; i < orderedData.size(); i++) {
-            String textName1 = orderedData.get(i).replace(",", "");
-            String textName2 = textName1.replace(".", "");
-//            Log.e("文字识别", textName2);
-            if (isAllUpperCase(textName2)) {
-                name = textName2;
-                hashMap.put("pan_name", textName2);
+            String textName = pNameReplace( orderedData.get(i));
+//            Log.e("文字识别", textName);
+            if (isAllUpperCase(textName)) {
+                name = textName;
+                hashMap.put("pan_name", textName);
                 break;
             }
         }
 
         // 设置唯一ID
         for (int i = 0; i < orderedData.size(); i++) {
-            String nameComparison = name.replaceAll("\\s", "");// 去除空格
-            String idCardNum = orderedData.get(i).replaceAll("\\s", "");// 去除空格
+            String nameComparison = removeAllSpace(name);// 去除空格
+            String idCardNum = removeAllSpace(orderedData.get(i));// 去除空格
             // Pan号码判断
-            if (!nameComparison.equals(idCardNum) && isPanCardNum(idCardNum)) {
+            if (!nameComparison.equals(idCardNum) && pIsCardNum(idCardNum)) {
                 hashMap.put("pan_id", idCardNum);
                 break;
             }
@@ -379,8 +350,8 @@ public class IndiaOCRProcessing {
 
         // 日期
         for (int i = 0; i < orderedData.size(); i++) {
-            String date = orderedData.get(i).replaceAll("\\s", "");// 去除空格
-            String parseDate = DateUtils.parsePanDate(date);
+            String date = removeAllSpace(orderedData.get(i));// 去除空格
+            String parseDate = DateUtils.pParseDate(date);
             if (isDatePureNum(parseDate)) {
 //                Log.e("日期", "=======Pan=======" + parseDate);
                 hashMap.put("pan_date", parseDate);
@@ -395,7 +366,7 @@ public class IndiaOCRProcessing {
     /**
      * PAN卡过滤垃圾信息
      */
-    private static boolean isPanFilterInfo(String str) {
+    private static boolean pIsFilterSpamInfo(String str) {
         if (str == null || str.isEmpty()) {
             return false;
         }
@@ -444,45 +415,5 @@ public class IndiaOCRProcessing {
                 && !str.contains("भारत सरकार")
                 && !str.contains("आयकर विभाग")
                 && !str.contains("जन्म की तारीख");
-    }
-
-    /**
-     * Pan号码正则，或者长度为10,并且需要包含数字和大写英文
-     */
-    private static boolean isPanCardNum(String str) {
-        if (str == null || str.length() < 10) {
-            return false;
-        }
-
-        // Pan号码正则
-        String panNumRegular = "(?i:\\b[A-Z]{3}[ABCFGHJLPT][A-Z]\\d{4}[A-Z]\\b)";
-        if (str.matches(panNumRegular)) {
-            return true;
-        }
-        // 修改特殊字符，修改后再次走正则
-        str = StringUtils.panNumModifySpecialStr(str);
-        if (str.matches(panNumRegular)) {
-            return true;
-        }
-
-        int upperCaseCount = 0;
-        int digitCount = 0;
-        // 修饰后的数据如果还是不能被正则匹配，
-        // 那就统计判断：大写英文字母至少6位，数字至少4位
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (Character.isUpperCase(c)) {
-                // 是大写英文字母
-                upperCaseCount++;
-            } else if (Character.isDigit(c)) {
-                // 是数字
-                digitCount++;
-            } else {
-                // 包含其他字符
-                return false;
-            }
-        }
-        // 检查大写英文字母至少6位，数字至少4位
-        return upperCaseCount >= 6 && digitCount >= 4;
     }
 }

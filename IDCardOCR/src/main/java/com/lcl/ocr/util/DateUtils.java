@@ -20,7 +20,7 @@ public class DateUtils {
     /**
      * Aadhaar：时间格式处理
      */
-    public static String parseAadhaarDate(String input) {
+    public static String aParseDate(String input) {
         if (input == null || input.isEmpty()) {
             return "";
         }
@@ -89,7 +89,7 @@ public class DateUtils {
     /**
      * Pan：时间格式处理
      */
-    public static String parsePanDate(String input) {
+    public static String pParseDate(String input) {
         if (input == null || input.isEmpty()) {
             return "";
         }
